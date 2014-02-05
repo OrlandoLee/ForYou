@@ -78,6 +78,8 @@ def processLowestLevelPage(url)
 	    end
 	end 
 	releaseDate = '"'
+=begin
+#to figure out the release cycle
 	lastestEntryArray.each do |row|
 	    releaseDateEntry = row.css("td[class=release-date]")
 	    unless releaseDateEntry.nil? 
@@ -86,7 +88,7 @@ def processLowestLevelPage(url)
 	end
 	releaseDate = releaseDate.chop + '"' 
 	#puts releaseDate  
-
+=end
    	result+","+releaseDate +","+discription  
         else
 	
