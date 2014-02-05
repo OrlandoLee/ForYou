@@ -15,6 +15,7 @@ def processLowestLevelPage(url)
   podcastName = ""
   artist = ""
   link = ""
+  discription = ""
   unless topicEntry.nil?
     topic = topicEntry.css("a")[0].text.gsub(/[,]/, ',' => ' ') 
   end
@@ -38,21 +39,31 @@ def processLowestLevelPage(url)
 #link should compare with last time
 #if same do not update
 #if not update and also flag
-
+    discriptionEntry = page.css("div[metrics-loc=Titledbox_描述]").css("p")
+    unless discriptionEntry.nil?
+	discription = '"'+discriptionEntry.text+'"'
+	#puts discription
+    end
     contentBox = page.css("div[class=tracklist-content-box]")
-    lastestEntry = contentBox.css("tbody").css("tr")[0]
+   
+    lastestEntryArray = contentBox.css("tbody").css("tr")
+    unless lastestEntryArray.nil?
+    lastestEntryArray = lastestEntryArray[0..[lastestEntryArray.size,15].min]
+    lastestEntry = lastestEntryArray[0]
     result = ""
-    unless lastestEntry.nil?
+
+   	 unless lastestEntry.nil?
 	   unless lastestEntry['preview-artist'].nil?
    	   	artist = lastestEntry['preview-artist'].gsub(/[,]/, ',' => ' ') 
            end
    	   unless lastestEntry['audio-preview-url'].nil?
    	   	link = lastestEntry['audio-preview-url']
            end
-   	 
+   	 end
     	print artist+","
     	print link
-	puts
+	puts 
+   
     	unless podcastId.nil? 
 		result = result+podcastId+","
 	    end
@@ -65,9 +76,22 @@ def processLowestLevelPage(url)
 	    unless link.nil? 
 		result = result+link
 	    end
-	end    
-	     result    
-end
+	end 
+	releaseDate = '"'
+	lastestEntryArray.each do |row|
+	    releaseDateEntry = row.css("td[class=release-date]")
+	    unless releaseDateEntry.nil? 
+		releaseDate =releaseDate + releaseDateEntry.text.strip+','
+	    end	
+	end
+	releaseDate = releaseDate.chop + '"' 
+	#puts releaseDate  
+
+   	result+","+releaseDate +","+discription  
+        else
+	
+	end
+
 end
 
 def processThirdLevel( topic,thirdLevelUrl)
@@ -159,6 +183,7 @@ topLevelTopics.each do |topLevelTopic|#each
   end
 
 end
+
 
 
 
