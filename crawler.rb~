@@ -6,99 +6,125 @@ count = 0
 
 def processLowestLevelPage(url)
 
-  page = Nokogiri::HTML(open("https://itunes.apple.com/cn/podcast/moments/id510269552?mt=2"))
+  page = Nokogiri::HTML(open(url))
   leftStack = page.css("div[id=left-stack]")
-  topic = leftStack.css("li[class=genre]").css("a")[0].text
-  language = leftStack.css("li[class=language]")[0].text
+  topicEntry = leftStack.css("li[class=genre]")
+  language = ""
+  topic = ""
+  podcastId = ""
+  podcastName = ""
+  artist = ""
+  link = ""
+  discription = ""
+  result = ""
+  releaseDate = ""
+  unless topicEntry.nil?
+    topic = '"'+topicEntry.css("a")[0].text.gsub(/[\r,\n,\"]/,'').strip+'"'
+  end
+  languageEntry = leftStack.css("li[class=language]")
+  unless languageEntry.nil?
+    language = languageEntry[0].text
+  end
   if language == "语言: 中文"
     podcastInfo = page.css("div").select{|podcastId| podcastId['podcast-id']}[0]
+    unless podcastInfo['podcast-id'].nil?
     podcastId = podcastInfo['podcast-id']
-    podcastName = podcastInfo['podcast-name']
-    puts podcastId
-  # puts podcastName
-    puts topic
-    puts language
+    end
+    unless podcastInfo['podcast-name'].nil?
+    podcastName = '"'+podcastInfo['podcast-name'].gsub(/[\r,\n,\"]/,'').strip+'"' 
+    end
+    print podcastId+","
+    print podcastName+","
+    print topic+","
+    print language+","
 
 #link should compare with last time
 #if same do not update
 #if not update and also flag
-
+    discriptionEntry = page.css("div[metrics-loc=Titledbox_描述]").css("p")
+    unless discriptionEntry.nil?
+	discription = '"'+discriptionEntry.text.gsub(/[\r,\n,\"]/,'').strip+'"'
+	#puts discription
+    end
     contentBox = page.css("div[class=tracklist-content-box]")
-    lastestEntry = contentBox.css("tbody").css("tr")[0]
-    result = ""
-    unless lastestEntry.nil?
-   	 artist = lastestEntry['preview-artist']
-   	 link = lastestEntry['audio-preview-url']
-    	puts artist
-    	puts link
-     	
-#    puts
-    	unless podcastId.nil? 
-		result = result+podcastId+","
-	    end
-	    unless podcastName.nil?
-		result = result+podcastName+","
-	    end
-	    unless artist.nil?
-		result = result+artist+","
-	    end
-	    unless link.nil? 
-		result = result+link
-	    end
-	end    
-	     result    
-end
-end
+   
+    lastestEntryArray = contentBox.css("tbody").css("tr")
+    unless lastestEntryArray.nil?
+    lastestEntryArray = lastestEntryArray[0..[lastestEntryArray.size,15].min]
+    lastestEntry = lastestEntryArray[0]
+    
 
-def processThirdLevel( topic,thirdLevelUrl)
-	File.open('result.txt', 'w') do |f2|  
-          thirdLevelPage =  Nokogiri::HTML(open(thirdLevelUrl))
- 	  firstColumn = thirdLevelPage.css("div[class='column first']").css("li")
-  	  secondColumn = thirdLevelPage.css("div[class='column']").css("li")
-  	  lastColumn = thirdLevelPage.css("div[class='column last']").css("li")
-  	  firstColumn.each do |singlePage|
-		puts singlePage.text
-		url = 	singlePage.css("a")[0]["href"]
-		result = processLowestLevelPage(url)
-		if topic.nil? 
-		  f2.puts "topic.nil"
-		elsif result.nil?
-		  
-		else	
-		  f2.puts result+","+topic
-		end
-	  end
+   	 unless lastestEntry.nil?
+	   unless lastestEntry['preview-artist'].nil?
+   	   	artist = '"'+lastestEntry['preview-artist'].gsub(/[\r,\n,\"]/,'').strip+'"'
+           end
+   	   unless lastestEntry['audio-preview-url'].nil?
+   	   	link = lastestEntry['audio-preview-url']
+           end
+   	 end
+    	print artist+","
+    	print link
+	puts 
+    end 
+    
+	result = result+podcastId+","+podcastName+","+artist+","+link
 	
-          secondColumn.each do |singlePage|
-		puts singlePage.text
-		url = 	singlePage.css("a")[0]["href"]
-		result = processLowestLevelPage(url)
-		if topic.nil? 
-		  f2.puts "topic.nil"
-		elsif result.nil?
-		  
-		else	
-		  f2.puts result+","+topic
-		end
-	  end
+	
 
-	 lastColumn.each do |singlePage|
-		puts singlePage.text
+#to figure out the release cycle
+	lastestEntryArray.each do |row|
+	    releaseDateEntry = row.css("td[class=release-date]")
+	    unless releaseDateEntry.nil? 
+		releaseDate =releaseDate + releaseDateEntry.text.gsub(/[\r,\n,\"]/,'').strip+','
+	    end	
+	end
+	releaseDate = '"'+releaseDate + '"' 
+ 
+   	result+","+releaseDate +","+discription+","+url  
+        else
+	
+	end
+
+end
+##########
+def processThirdLevel( topic,thirdLevelUrl)
+	thirdLevelPage =  Nokogiri::HTML(open(thirdLevelUrl))
+	File.open('result.txt', 'a') do |f2|  
+         
+ 	  firstColumn = thirdLevelPage.css("div[class='column first']").css("li")
+  	  firstColumn.each do |singlePage|
+		#puts singlePage.text
 		url = 	singlePage.css("a")[0]["href"]
-		result = processLowestLevelPage(url)
-		if topic.nil? 
-		  f2.puts "topic.nil"
-		elsif result.nil?
-		  
-		else	
-		  f2.puts result+","+topic
-		end
+		result = processLowestLevelPage(url)	
+		f2.puts result+","+topic
 	  end
+	  f2.close
+	end
+
+	File.open('result.txt', 'a') do |f2| 
+	  secondColumn = thirdLevelPage.css("div[class='column']").css("li")
+          secondColumn.each do |singlePage|
+		#puts singlePage.text
+		url = 	singlePage.css("a")[0]["href"]
+		result = processLowestLevelPage(url)	
+		f2.puts result+","+topic
+	  end
+	  f2.close
+	end
+
+	File.open('result.txt', 'a') do |f2|
+	 lastColumn = thirdLevelPage.css("div[class='column last']").css("li")  
+	 lastColumn.each do |singlePage|
+		#puts singlePage.text
+		url = 	singlePage.css("a")[0]["href"]
+		result = processLowestLevelPage(url)	
+		f2.puts result+","+topic
+	  end
+	 f2.close
 	end
 end
 
 
-begin
 rootUrl = "https://itunes.apple.com/cn/genre/podcast/id26?mt=2"
 page = Nokogiri::HTML(open(rootUrl))
 topLevelTopics = page.css("a[class=top-level-genre]")
@@ -114,7 +140,7 @@ topLevelTopics.each do |topLevelTopic|#each
   thirdLevelUrl =""
   if children.size>0
         children.css("a").each do |lowerTopic|
-	  topic = topLevelTopic.text+","+lowerTopic.text
+	topic = '"'+topLevelTopic.text.gsub(/[\r,\n,\"]/,'').strip+'"'+","+'"'+lowerTopic.text.gsub(/[\r,\n,\"]/,'').strip+'"'
           #puts lowerTopic["href"]
 	  thirdLevelUrl = lowerTopic["href"]
 	  
@@ -122,7 +148,7 @@ topLevelTopics.each do |topLevelTopic|#each
 	end
   else
 	lowerLevel = nextPage.css("a[class='selected top-level-genre']")
-	topic =  lowerLevel.text
+	topic =  '"'+lowerLevel.text.gsub(/[\r,\n,\"]/,'').strip+'"'
 	#puts lowerLevel[0]["href"]
 	thirdLevelUrl = lowerLevel[0]["href"]
 
@@ -134,5 +160,5 @@ topLevelTopics.each do |topLevelTopic|#each
 end
 
 
-end
+
 
