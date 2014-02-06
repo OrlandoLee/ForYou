@@ -87,57 +87,50 @@ def processLowestLevelPage(url)
 
 end
 ##########
-def processThirdLevel( topic,thirdLevelUrl)
-	thirdLevelPage =  Nokogiri::HTML(open(thirdLevelUrl))
-	File.open('result.txt', 'a') do |f2|  
-         
- 	  firstColumn = thirdLevelPage.css("div[class='column first']").css("li")
-  	  firstColumn.each do |singlePage|
-		#puts singlePage.text
-		url = 	singlePage.css("a")[0]["href"]
-		result = processLowestLevelPage(url)
-		if result.nil?	
-		else
-  		  f2.puts result+","+topic
-		end
-	  end
-	  f2.close
-	end
+def processThirdLevel( topic,thirdLevelUrl,f2)
+  thirdLevelPage =  Nokogiri::HTML(open(thirdLevelUrl))	
+  if f2
+    firstColumn = thirdLevelPage.css("div[class='column first']").css("li")
+    firstColumn.each do |singlePage|
+    #puts singlePage.text
+    url = singlePage.css("a")[0]["href"]
+    result = processLowestLevelPage(url)
+      if result.nil?	
+      else
+        f2.puts result+","+topic
+      end
+    end
+    secondColumn = thirdLevelPage.css("div[class='column']").css("li")
+    secondColumn.each do |singlePage|
+    #puts singlePage.text
+    url = singlePage.css("a")[0]["href"]
+    result = processLowestLevelPage(url)
+    if result.nil?	
+    else
+      f2.puts result+","+topic
+      end
+    end
+    lastColumn = thirdLevelPage.css("div[class='column last']").css("li")  
+    lastColumn.each do |singlePage|
+    #puts singlePage.text
+    url = singlePage.css("a")[0]["href"]
+    result = processLowestLevelPage(url)
+      if result.nil?	
+      else
+        f2.puts result+","+topic
+      end
+    end
 
-	File.open('result.txt', 'a') do |f2| 
-	  secondColumn = thirdLevelPage.css("div[class='column']").css("li")
-          secondColumn.each do |singlePage|
-		#puts singlePage.text
-		url = 	singlePage.css("a")[0]["href"]
-		result = processLowestLevelPage(url)
-		if result.nil?	
-		else
-  		  f2.puts result+","+topic
-		end
-	  end
-	  f2.close
-	end
-
-	File.open('result.txt', 'a') do |f2|
-	 lastColumn = thirdLevelPage.css("div[class='column last']").css("li")  
-	 lastColumn.each do |singlePage|
-		#puts singlePage.text
-		url = 	singlePage.css("a")[0]["href"]
-		result = processLowestLevelPage(url)
-		if result.nil?	
-		else
-  		  f2.puts result+","+topic
-		end
-	  end
-	 f2.close
-	end
+  else
+    puts "Unable to open file!"
+  end
 end
 
 
 rootUrl = "https://itunes.apple.com/cn/genre/podcast/id26?mt=2"
 page = Nokogiri::HTML(open(rootUrl))
 topLevelTopics = page.css("a[class=top-level-genre]")
-topLevelTopics.each do |topLevelTopic|#each
+topLevelTopics.each do |topLevelTopic|
 ###  puts topLevelTopic.text
 #  puts topLevelTopic["href"]
 
@@ -146,6 +139,7 @@ topLevelTopics.each do |topLevelTopic|#each
 
   nextPage = Nokogiri::HTML(open(topLevelTopic["href"]))
   children = nextPage.css("ul[class='list top-level-subgenres']")
+   f2 = File.new("result.txt", "w")
   thirdLevelUrl =""
   if children.size>0
         children.css("a").each do |lowerTopic|
@@ -153,7 +147,7 @@ topLevelTopics.each do |topLevelTopic|#each
           #puts lowerTopic["href"]
 	  thirdLevelUrl = lowerTopic["href"]
 	  
-          processThirdLevel(topic,thirdLevelUrl)
+          processThirdLevel(topic,thirdLevelUrl,f2)
 	end
   else
 	lowerLevel = nextPage.css("a[class='selected top-level-genre']")
@@ -161,10 +155,11 @@ topLevelTopics.each do |topLevelTopic|#each
 	#puts lowerLevel[0]["href"]
 	thirdLevelUrl = lowerLevel[0]["href"]
 
-	processThirdLevel(topic,thirdLevelUrl)
+	processThirdLevel(topic,thirdLevelUrl,f2)
  	
 	
   end
+      f2.close
 
 end
 
