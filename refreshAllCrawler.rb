@@ -70,8 +70,6 @@ def processLowestLevelPage(url)
 	result = result+podcastId+","+podcastName+","+artist+","+link
 	
 	
-
-#to figure out the release cycle
 	lastestEntryArray.each do |row|
 	    releaseDateEntry = row.css("td[class=release-date]")
 	    unless releaseDateEntry.nil? 

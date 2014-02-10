@@ -1,7 +1,5 @@
 require "csv"
 require 'date'
-
-#TO-DO add check if updated compared with last download time from crawl_data_table before changing it
 def group_value(a)
   a.group_by do |e|
     e
@@ -26,13 +24,9 @@ unless date.nil?
   end
  unless newDate[0].nil?
  if Date.parse(newDate[0])>Date.parse("13-12-1")
- 
  #print newDate
  for i in 0..newDate.size-2
     cycle[count]=(Date.parse(newDate[i])-Date.parse(newDate[i+1])).to_i
-     if cycle[0] == 0
- 	puts id+"!!!!!!!!!!!!!! is having more than one latest release"
-    end  
     count = count+1
   end 
   #print cycle
