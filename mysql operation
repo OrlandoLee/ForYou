@@ -1,0 +1,25 @@
+--create user
+CREATE USER 'zongsheng'@'localhost';
+create database foryou;
+GRANT ALL PRIVILEGES ON foryou.* To 'zongsheng'@'localhost';
+
+--change file
+sudo gedit /etc/mysql/my.cnf
+
+add following
+[mysqld]
+local-infile #added
+...#previous ones
+skip-character-set-client-handshake
+collation_server=utf8_unicode_ci
+character_set_server=utf8 
+
+[mysql]
+#no-auto-rehash	# faster start of mysql but no tab completition
+local-infile  #added
+
+
+sudo service mysql restart
+SHOW VARIABLES LIKE 'character_set%';
+
+SELECT User FROM mysql.user;

@@ -1,0 +1,1 @@
+create table podcast(id varchar(10) PRIMARY KEY, title VARCHAR(100),publisher VARCHAR(50), url VARCHAR(200), updateDate VARCHAR(200), description Varchar(4000), mainCategory VARCHAR(10), subCategory varchar(10));

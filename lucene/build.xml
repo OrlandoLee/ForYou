@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="compile" name="project3">
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="src-dir" location="src" />
+    <property name="obj-dir" location="bin" />
+    <property name="lib-dir" location="lib" />
+    <property name="extlib-dir" location="/usr/local/java" />
+
+    <property environment="env" />
+    <path id="classpath">
+        <fileset dir="${lib-dir}" includes="**/*.jar"/>
+        <fileset dir="${extlib-dir}" includes="**/*.jar"/>
+        <pathelement location="${obj-dir}"/>
+    </path>
+
+    <target name="init">
+		<mkdir dir="${obj-dir}" />
+		<mkdir dir="${lib-dir}" />
+    </target>
+
+    <target name="clean">
+		<delete dir="${obj-dir}" />
+    </target>
+
+    <target name="compile" depends="init">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" srcdir="${src-dir}" destdir="${obj-dir}" includes="edu/ucla/cs/cs144/*.java">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>    
+
+    <target name="run" depends="compile">
+        <java classname="edu.ucla.cs.cs144.HelloLucene" failonerror="true" fork="yes">
+            <classpath refid="classpath"/>
+            <jvmarg value="-DLUCENE_INDEX=${env.LUCENE_INDEX}"/>
+        </java>
+    </target>
+</project>

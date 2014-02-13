@@ -1,0 +1,4 @@
+#!/bin/bash
+mysql -u zongsheng foryou  < drop.sql
+mysql -u zongsheng foryou < create.sql
+mysql -u zongsheng  --default_character_set utf8 foryou < load.sql

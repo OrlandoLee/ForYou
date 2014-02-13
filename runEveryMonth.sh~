@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ruby refreshAllCrawler.rb
+ruby caculateCycle.rb
